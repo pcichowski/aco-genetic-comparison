@@ -3,7 +3,7 @@ import csv
 import networkx as nx
 from matplotlib import pyplot as plt
 
-def load_edges():
+def load_graph():
     graph = nx.Graph()
     with open('./graph_input.csv', encoding='utf-8') as file_graph_input:
         csv_reader = csv.reader(file_graph_input, delimiter=' ')
@@ -14,8 +14,13 @@ def load_edges():
             for node in row[1:]:
                 graph.add_edge(initial_node, node)
 
-    nx.draw(graph)
+    return graph
 
-    plt.show()
+G = load_graph()
+for node in nx.nodes(G):
+    ns = G.neighbors(node)
+    print(f"{node}: ", end='')
+    for n in ns:
+        print(n, end=' ')
 
-load_edges()
+    print("")
