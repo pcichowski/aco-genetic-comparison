@@ -35,5 +35,14 @@ class TestRemoveLoops(unittest.TestCase):
 
         self.assertEqual(result, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
+    def test_remove_loops_tricky(self):
+        """
+            Test that it can remove a common list with loops
+        """
+        data = [1, 2, 3, 4, 5, 6, 2, 6, 7, 2, 7, 6, 8, 4, 9, 10, 11, 10, 2, 12]
+        result = remove_loops(data)
+
+        self.assertEqual(result, [1, 2, 12])
+
 
 unittest.main()
