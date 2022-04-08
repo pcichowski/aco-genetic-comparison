@@ -45,28 +45,16 @@ class Ant:
 
 # TODO refactor function to be more optimised
 def remove_loops(path):
-    visited = []
-
-    running = True
-    while running:
-        for itr, el in enumerate(path):
-            breaking = False
-            if el in visited:
-                for i in range(itr - 1, 0, -1):
-                    if path[i] == el:
-                        new_path = path[:i] + path[itr:]
-
-                        path = new_path
-                        breaking = True
-                        break
-            else:
-                visited.append(el)
-
-            if breaking:
-                breaking = False
+    j = 1
+    while True:
+        if j >= len(path):
+            break
+        el = path[-1 * j]
+        itr = len(path) - j
+        for i in range(0, itr):
+            if path[i] == el:
+                path = path[:i] + path[itr:]
                 break
-            if itr == len(path) - 1:
-                running = False
-
+        j += 1
     return path
 
