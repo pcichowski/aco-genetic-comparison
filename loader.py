@@ -15,7 +15,7 @@ def load_graph():
 
             for node in row[1:]:
 
-                graph.add_edge(initial_node, int(node), distance=randint(1, 100))
+                graph.add_edge(initial_node, int(node), distance=randint(1, 100), pheromone=0)
 
     return graph
 

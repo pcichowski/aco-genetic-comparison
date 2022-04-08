@@ -1,32 +1,61 @@
 import networkx as nx
 from loader import load_graph
 from operator import itemgetter
-
-alpha = 0.5
-beta = 1.2
-
-NUMBER_OF_STEPS = 200
+from Ant import Ant
 
 
-# args
-# node - node from which the ant want to moves
-def generate_solutions(graph, node):
-    sum = 0
-    for neighbor in graph.neighbors(node):
-        pheromone = graph[node][neighbor]['pheromone']
-        distance = graph[node][neighbor]['distance']
-        sum += pheromone ** alpha * distance ** beta
+NUMBER_OF_ITERATIONS = 200
+NUMBER_OF_ANTS = 10
 
-    possible_solutions = []
+PHEROMONE_COEFFICIENT = 3
+EVAPORATION_COEFFICIENT = 0.2
 
-    for neighbor in graph.neighbors(node):
-        pheromone = graph[node][neighbor]['pheromone']
-        distance = graph[node][neighbor]['distance']
-        probability = pheromone ** alpha * distance ** beta / sum
 
-        possible_solutions.append((neighbor, probability))
+def simulate_colony():
 
-    return possible_solutions
+    graph = load_graph()
+
+    begin = min(graph.nodes())
+    end = max(graph.nodes())
+
+    for _ in range(NUMBER_OF_ITERATIONS):
+
+        ants = []
+
+        # add N ants
+        for ant_id in range(NUMBER_OF_ANTS):
+            ant = Ant(ant_id, graph, begin, end)
+            ants.append(ant)
+
+        # let the ants start their journey
+        for ant in ants:
+            ant.walk_to_goal()
+
+        for ant in ants:
+            delta_pheromone = PHEROMONE_COEFFICIENT / ant.distance_walked
+
+            for i in range(len(ant.path_walked) - 1):  # for each segment
+                node = ant.path_walked[i]
+                next_node = ant.path_walked[i + 1]
+
+                graph[node][next_node]['pheromone'] += delta_pheromone
+
+        for edge in graph.edges:
+
+            graph[edge[0]][edge[1]]['pheromone'] *= (1 - PHEROMONE_COEFFICIENT)
+
+            # edge['pheromone'] *= (1 - PHEROMONE_COEFFICIENT)
+
+            if graph[edge[0]][edge[1]]['pheromone'] < 0:
+                graph[edge[0]][edge[1]]['pheromone'] = 0
+
+    determinant_ant = Ant(-1, graph, begin, end)
+
+    determinant_ant.walk_to_goal()
+
+    final_path = determinant_ant.path_walked
+
+    print(final_path)
 
 
 def ant_colony_algorithm(graph, begin, end):  # for each ant
@@ -44,3 +73,5 @@ def ant_colony_algorithm(graph, begin, end):  # for each ant
 
         best_solution = max(solutions, lambda i: i[1])[0]
 
+
+simulate_colony()
