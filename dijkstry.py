@@ -46,12 +46,14 @@ def dijkstry(G, snode, enode):
 
 # Wykonanie
 graph = load_graph()
+nx.draw(graph)
+plt.show()
 nx.set_node_attributes(graph, None, 'parent')
 nx.set_node_attributes(graph, False, 'visited')
 new_graph = dijkstry(graph, 0, 15)
 
 for node in new_graph.nodes:
-    print(node)
+    print(node, end=' ')
 
 nx.draw(new_graph)
 plt.show()
