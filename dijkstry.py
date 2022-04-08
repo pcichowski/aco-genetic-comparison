@@ -5,13 +5,13 @@ from loader import load_graph
 from matplotlib import pyplot as plt
 
 
-def path_from(G,node):
+def path_from(G, node):
     graph = nx.Graph()
     graph.add_node(node)
 
     while G.nodes[node]['parent'] is not None:
         parent = G.nodes[node]['parent']
-        graph.add_node(parent,parent=G.nodes[parent]['parent'],visited=False)
+        graph.add_node(parent, parent=G.nodes[parent]['parent'], visited=False)
         graph.add_edge(parent, node)
         node = parent
 
@@ -48,11 +48,10 @@ def dijkstry(G, snode, enode):
 graph = load_graph()
 nx.set_node_attributes(graph, None, 'parent')
 nx.set_node_attributes(graph, False, 'visited')
-new_graph = dijkstry(graph,0,15)
+new_graph = dijkstry(graph, 0, 15)
 
 for node in new_graph.nodes:
     print(node)
 
 nx.draw(new_graph)
 plt.show()
-
