@@ -19,8 +19,8 @@ def simulate_colony():
     begin = min(graph.nodes())
     end = max(graph.nodes())
 
-    most_common_paths = []
-    most_common_paths_counts = []
+    most_common_paths = [[], [], []]
+    most_common_paths_counts = [[], [], []]
     iterations = []
 
     for iteration in range(NUMBER_OF_ITERATIONS):
@@ -66,12 +66,23 @@ def simulate_colony():
 
         max_index = all_paths_counts.index(max(all_paths_counts))
 
-        # all_paths = sorted(zip(all_paths, all_paths_counts), key=lambda k: k[1], reverse=True)
+        all_paths_counts_sorted = sorted(all_paths_counts, reverse=True)
 
-        most_common_paths.append(all_paths[max_index])
-        most_common_paths_counts.append(all_paths_counts[max_index])
+        for i, top_path_count in enumerate(all_paths_counts_sorted[:3]):
+            most_common_paths[i].append(all_paths[all_paths_counts.index(top_path_count)])
+            most_common_paths_counts[i].append(all_paths_counts[all_paths_counts.index(top_path_count)])
+
+        if len(all_paths_counts_sorted) == 1:
+            most_common_paths[1].append(([], 0))
+            most_common_paths_counts[1].append(0)
+            most_common_paths[2].append(([], 0))
+            most_common_paths_counts[2].append(0)
+
+        if len(all_paths_counts_sorted) == 2:
+            most_common_paths[2].append(([], 0))
+            most_common_paths_counts[2].append(0)
+
         iterations.append(iteration)
-
     determinant_ant = Ant(-1, graph, begin, end)
 
     determinant_ant.walk_to_goal_extended()
@@ -81,11 +92,7 @@ def simulate_colony():
     print(final_path)
     print(determinant_ant.distance_walked)
 
-    distances = [dist for _, dist in most_common_paths]
-
-    plt.plot(iterations, distances)
-    plt.plot(iterations, most_common_paths_counts)
-    plt.savefig('./figure.png')
+    create_statistics(iterations, most_common_paths, most_common_paths_counts)
 
     nx.set_node_attributes(graph, None, 'parent')
     nx.set_node_attributes(graph, False, 'visited')
@@ -105,20 +112,28 @@ def simulate_colony():
     print(total_distance)
 
 
-def ant_colony_algorithm(graph, begin, end):  # for each ant
-    graph = load_graph()
+def create_statistics(iterations, most_common_paths, most_common_paths_counts):
+    distances0 = [dist for _, dist in most_common_paths[0]]
+    distances1 = [dist for _, dist in most_common_paths[1]]
+    distances2 = [dist for _, dist in most_common_paths[2]]
 
-    nx.set_edge_attributes(graph, 0, 'pheromone')
-    nx.set_edge_attributes(graph, 0, 'probability')
+    counts0 = most_common_paths_counts[0]
+    counts1 = most_common_paths_counts[1]
+    counts2 = most_common_paths_counts[2]
 
-    ants = []
+    fig, axs = plt.subplots(2, 1, figsize=(8, 8))
 
-    current_node = begin
+    ax = axs[0]
+    ax.plot(iterations, distances0, 'r-', iterations, distances1, 'g-', iterations, distances2, 'b-')
+    ax.grid(True)
+    ax.set_title('Top 3 path lengths')
 
-    while running:
-        solutions = generate_solutions(graph, current_node)
+    ax = axs[1]
+    ax.plot(iterations, counts0, 'r-', iterations, counts1, 'g-', iterations, counts2, 'b-')
+    ax.grid(True)
+    ax.set_title('No of ants for each path')
 
-        best_solution = max(solutions, lambda i: i[1])[0]
+    plt.savefig('./figure.png')
 
 
 simulate_colony()
