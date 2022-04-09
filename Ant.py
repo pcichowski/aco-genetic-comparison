@@ -3,7 +3,7 @@ from numpy.random import choice
 import networkx as nx
 
 alpha = 1.1
-beta = 1.5
+beta = 1.05
 
 
 class Ant:

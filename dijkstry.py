@@ -24,6 +24,8 @@ def dijkstry(G, snode, enode):
     heapify(options)
     i = 1
 
+    reach_cost = {snode: 0}
+
     while len(options) > 0:
 
         tuple = heappop(options)
@@ -33,11 +35,15 @@ def dijkstry(G, snode, enode):
         children = G.neighbors(node)
         for child in children:
 
+            cost = reach_cost[node] + G[node][child]['distance']
+
             if child == enode:
                 G.nodes[child]['parent'] = node
                 return path_from(G, child)
 
-            if not G.nodes[child]['visited']:
+            if child not in reach_cost or cost < reach_cost[child]:
+                reach_cost[child] = cost
+            # if not G.nodes[child]['visited']:
                 G.nodes[child]['parent'] = node
                 new_tuple = (tuple[0] + 1, i, child)
                 i += 1

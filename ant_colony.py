@@ -5,11 +5,11 @@ from Ant import Ant
 from dijkstry import dijkstry
 from matplotlib import pyplot as plt
 
-NUMBER_OF_ITERATIONS = 200
-NUMBER_OF_ANTS = 100
+NUMBER_OF_ITERATIONS = 50
+NUMBER_OF_ANTS = 200
 
-PHEROMONE_COEFFICIENT = 5
-EVAPORATION_COEFFICIENT = 0.25
+PHEROMONE_COEFFICIENT = 2
+EVAPORATION_COEFFICIENT = 0.4
 
 
 def simulate_colony():
@@ -19,7 +19,7 @@ def simulate_colony():
     begin = min(graph.nodes())
     end = max(graph.nodes())
 
-    most_common_paths = [[], [], []]
+    most_common_paths = [[], [], [], []]
     most_common_paths_counts = [[], [], []]
     iterations = []
 
@@ -68,6 +68,8 @@ def simulate_colony():
 
         all_paths_counts_sorted = sorted(all_paths_counts, reverse=True)
 
+        min_path = sorted(all_paths, key=lambda k: k[1])[0]
+
         for i, top_path_count in enumerate(all_paths_counts_sorted[:3]):
             most_common_paths[i].append(all_paths[all_paths_counts.index(top_path_count)])
             most_common_paths_counts[i].append(all_paths_counts[all_paths_counts.index(top_path_count)])
@@ -81,6 +83,8 @@ def simulate_colony():
         if len(all_paths_counts_sorted) == 2:
             most_common_paths[2].append(([], 0))
             most_common_paths_counts[2].append(0)
+
+        most_common_paths[3].append(min_path)
 
         iterations.append(iteration)
     determinant_ant = Ant(-1, graph, begin, end)
@@ -116,23 +120,30 @@ def create_statistics(iterations, most_common_paths, most_common_paths_counts):
     distances0 = [dist for _, dist in most_common_paths[0]]
     distances1 = [dist for _, dist in most_common_paths[1]]
     distances2 = [dist for _, dist in most_common_paths[2]]
+    distances_min = [dist for _, dist in most_common_paths[3]]
 
     counts0 = most_common_paths_counts[0]
     counts1 = most_common_paths_counts[1]
     counts2 = most_common_paths_counts[2]
 
-    fig, axs = plt.subplots(2, 1, figsize=(8, 8))
+    fig, axs = plt.subplots(2, 1, figsize=(6, 7))
 
     ax = axs[0]
-    ax.plot(iterations, distances0, 'r-', iterations, distances1, 'g-', iterations, distances2, 'b-')
+    ax.plot(iterations, distances0, 'r-', label='Most popular path')
+    ax.plot(iterations, distances_min, 'c-', label='Shortest path found')
     ax.grid(True)
-    ax.set_title('Top 3 path lengths')
+    ax.set_title('Most popular and shortest path lengths')
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel('Path length')
 
     ax = axs[1]
     ax.plot(iterations, counts0, 'r-', iterations, counts1, 'g-', iterations, counts2, 'b-')
     ax.grid(True)
-    ax.set_title('No of ants for each path')
+    ax.set_title('Top three popular paths')
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel('Number of ants that chose this path')
 
+    plt.tight_layout()
     plt.savefig('./figure.png')
 
 
