@@ -51,16 +51,24 @@ def dijkstry(G, snode, enode):
 
 
 # Wykonanie
-def execute():
-    graph = load_graph()
-    nx.draw(graph)
-    plt.show()
+def execute_dijkstra(graph, begin, end):
+    # nx.draw(graph)
+    # plt.show()
     nx.set_node_attributes(graph, None, 'parent')
     nx.set_node_attributes(graph, False, 'visited')
-    new_graph = dijkstry(graph, 0, 15)
+    new_graph = dijkstry(graph, begin, end)
 
+    dijkstra_path = []
     for node in new_graph.nodes:
-        print(node, end=' ')
+        # print(node, end=' ')
+        dijkstra_path.append(node)
+    total_distance = 0
+    for i in range(len(dijkstra_path) - 1):  # for each segment
+        node = dijkstra_path[i]
+        next_node = dijkstra_path[i + 1]
 
-    nx.draw(new_graph)
-    plt.show()
+        distance = graph[node][next_node]['distance']
+        total_distance += distance
+
+
+    return dijkstra_path[::-1], total_distance
