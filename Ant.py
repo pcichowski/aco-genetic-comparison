@@ -2,8 +2,8 @@ import numpy as np
 from numpy.random import choice
 import networkx as nx
 
-alpha = 1.1
-beta = 1.05
+alpha = 1.3
+beta = 1.4
 
 
 class Ant:

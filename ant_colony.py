@@ -12,12 +12,7 @@ PHEROMONE_COEFFICIENT = 2
 EVAPORATION_COEFFICIENT = 0.4
 
 
-def simulate_colony():
-
-    graph = load_graph()
-
-    begin = min(graph.nodes())
-    end = max(graph.nodes())
+def simulate_colony(graph, begin, end):
 
     most_common_paths = [[], [], [], []]
     most_common_paths_counts = [[], [], []]
@@ -93,27 +88,12 @@ def simulate_colony():
 
     final_path = determinant_ant.path_walked
 
-    print(final_path)
-    print(determinant_ant.distance_walked)
+    # print(final_path)
+    # print(determinant_ant.distance_walked)
 
-    create_statistics(iterations, most_common_paths, most_common_paths_counts)
+    # create_statistics(iterations, most_common_paths, most_common_paths_counts)
 
-    nx.set_node_attributes(graph, None, 'parent')
-    nx.set_node_attributes(graph, False, 'visited')
-    new_graph = dijkstry(graph, 0, 19)
-    dijkstra_path = []
-    for node in new_graph.nodes:
-        # print(node, end=' ')
-        dijkstra_path.append(node)
-    total_distance = 0
-    for i in range(len(dijkstra_path) - 1):  # for each segment
-        node = dijkstra_path[i]
-        next_node = dijkstra_path[i + 1]
-
-        distance = graph[node][next_node]['distance']
-        total_distance += distance
-    print(dijkstra_path[::-1])
-    print(total_distance)
+    return final_path, determinant_ant.distance_walked
 
 
 def create_statistics(iterations, most_common_paths, most_common_paths_counts):
@@ -145,6 +125,3 @@ def create_statistics(iterations, most_common_paths, most_common_paths_counts):
 
     plt.tight_layout()
     plt.savefig('./figure.png')
-
-
-simulate_colony()
