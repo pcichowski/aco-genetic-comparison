@@ -7,7 +7,7 @@ from statistics import mean, stdev
 from matplotlib import pyplot as plt
 
 NUMBER_OF_NODES = 100
-NUMBER_OF_TESTS = 50
+NUMBER_OF_TESTS = 1
 
 results = {"shortest": [], "dijkstra": [], "ants": []}
 
