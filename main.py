@@ -5,8 +5,9 @@ import networkx as nx
 from random import randint
 from statistics import mean, stdev
 from matplotlib import pyplot as plt
+from graph_generator import *
 
-NUMBER_OF_NODES = 100
+NUMBER_OF_NODES = 20
 NUMBER_OF_TESTS = 1
 
 results = {"shortest": [], "dijkstra": [], "ants": []}
@@ -14,7 +15,9 @@ results = {"shortest": [], "dijkstra": [], "ants": []}
 
 def calculate(print_console=False):
     # graph = load_graph()
-    graph = nx.gnp_random_graph(NUMBER_OF_NODES, 0.05)
+    # graph = nx.gnp_random_graph(NUMBER_OF_NODES, 0.05)
+
+    graph = generate_graph(1000,1000, NUMBER_OF_NODES)
 
     nx.set_node_attributes(graph, None, 'parent')
     nx.set_node_attributes(graph, False, 'visited')
