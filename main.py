@@ -12,15 +12,11 @@ from ant import Ant
 from utils import calculate_total_distance
 from utils_genetic import plot_route, get_coords
 
-<<<<<<< HEAD
+
 NUMBER_OF_NODES = 25
 NUMBER_OF_TESTS = 1
-=======
-#nx.draw(g, poss)
->>>>>>> fe08b32 (Fixed bugs, improved performance)
 
 
-<<<<<<< HEAD
 def perform_test():
     graph = generate_graph(1000, 1000, 25)
 
