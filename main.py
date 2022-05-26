@@ -10,8 +10,7 @@ from ant import Ant
 
 
 from utils import calculate_total_distance
-from utils_genetic import plot_route, get_coords
-
+from utils_genetic import plot_route, get_coords, plot_improvement
 
 NUMBER_OF_NODES = 25
 NUMBER_OF_TESTS = 1
@@ -20,7 +19,7 @@ NUMBER_OF_TESTS = 1
 def perform_test():
     graph = generate_graph(1000, 1000, 25)
 
-    results = {'time': {}, 'distance': {}, 'path': {}}
+    results = {'time': {}, 'distance': {}, 'path': {}, 'steps': {}}
 
     # optimal approximation algorithm
     time_start = time.time()
@@ -31,19 +30,30 @@ def perform_test():
 
     # genetic algorithm
     time_start = time.time()
-    results['path']['genetic'], _ = genetic(graph)
+    results['path']['genetic'], results['steps']['genetic'] = genetic(graph)
     time_end = time.time()
     results['time']['genetic'] = time_end - time_start  # in seconds
     results['distance']['genetic'] = calculate_total_distance(graph, results['path']['genetic'])
 
+
     # ant colony optimization algorithm
+    colony = AntColony(graph, 20, 30)
     time_start = time.time()
-    results['path']['ants'] = [0]  # TODO execute ant colony algorithm
+    results['path']['ants'], results['distance']['ants'], results['steps']['ants'] = colony.simulate(2, 1, 0, 1)
     time_end = time.time()
     results['time']['ants'] = time_end - time_start  # in seconds
-    results['distance']['ants'] = calculate_total_distance(graph, results['path']['ants'])
 
-    print(results)
+    create_plots(graph, results)
+
+def create_plots(graph, results):
+    fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(10, 5))
+    plot_improvement(ax[0][0], graph, results['steps']['ants'])
+    plot_route(ax[1][0], graph, results['path']['ants'])
+
+    plot_improvement(ax[1][0], graph, results['steps']['genetic'])
+    plot_route(ax[1][1], graph, results['path']['genetic'])
+    plt.show()
+
 
 
 def run():
