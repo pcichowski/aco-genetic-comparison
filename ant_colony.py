@@ -5,11 +5,11 @@ from Ant import Ant
 from dijkstry import dijkstry
 from matplotlib import pyplot as plt
 
-NUMBER_OF_ITERATIONS = 50
-NUMBER_OF_ANTS = 200
+NUMBER_OF_ITERATIONS = 30
+NUMBER_OF_ANTS = 50
 
 PHEROMONE_COEFFICIENT = 2
-EVAPORATION_COEFFICIENT = 0.4
+EVAPORATION_COEFFICIENT = 0.7
 
 
 def simulate_colony(graph, begin, end):
@@ -89,9 +89,9 @@ def simulate_colony(graph, begin, end):
     final_path = determinant_ant.path_walked
 
     # print(final_path)
-    # print(determinant_ant.distance_walked)
+    #print(determinant_ant.distance_walked)
 
-    # create_statistics(iterations, most_common_paths, most_common_paths_counts)
+    create_statistics(iterations, most_common_paths, most_common_paths_counts)
 
     return final_path, determinant_ant.distance_walked
 

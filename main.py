@@ -5,8 +5,9 @@ import networkx as nx
 from random import randint
 from statistics import mean, stdev
 from matplotlib import pyplot as plt
+import time
 
-NUMBER_OF_NODES = 100
+NUMBER_OF_NODES = 1000
 NUMBER_OF_TESTS = 1
 
 results = {"shortest": [], "dijkstra": [], "ants": []}
@@ -39,11 +40,17 @@ def calculate(print_console=False):
 
     if print_console: print(f"shortest: {shortest_path}\n{shortest_distance}")
 
+    time_start = time.time()
     dijkstra_path, dijkstra_dist = execute_dijkstra(graph, begin, end)
+    time_end = time.time()
+    results['dijkstra_time'] = time_end - time_start
 
     if print_console: print(f"Dijkstra: {dijkstra_path}\n{dijkstra_dist}")
 
+    time_start = time.time()
     ant_path, ant_dist = simulate_colony(graph, begin, end)
+    time_end = time.time()
+    results['ants_time'] = time_end - time_start
 
     if print_console: print(f"Ants: {ant_path}\n{ant_dist}")
 
@@ -64,8 +71,8 @@ def main():
     for result_opt, result_ants in zip(results['shortest'], results['ants']):
         deviation_ants.append(round((result_ants - result_opt) / result_ants * 100, 2))
 
-    print(f"mean deviation of ants: {mean(deviation_ants)}%")
-    print(f"mean deviation of dijkstra: {mean(deviation_dijkstra)}%")
+    print(f"mean deviation of ants: {mean(deviation_ants)}%   time: {results['ants_time']}")
+    print(f"mean deviation of dijkstra: {mean(deviation_dijkstra)}%   time: {results['dijkstra_time']}")
 
     fig, axs = plt.subplots(2, 1, figsize=(8, 10))
     ax = axs[0]
