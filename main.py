@@ -12,10 +12,15 @@ from ant import Ant
 from utils import calculate_total_distance
 from utils_genetic import plot_route, get_coords
 
+<<<<<<< HEAD
 NUMBER_OF_NODES = 25
 NUMBER_OF_TESTS = 1
+=======
+#nx.draw(g, poss)
+>>>>>>> fe08b32 (Fixed bugs, improved performance)
 
 
+<<<<<<< HEAD
 def perform_test():
     graph = generate_graph(1000, 1000, 25)
 
@@ -63,5 +68,7 @@ def run():
 
 run()
 
-# colony = AntColony(g, 200, 50)
-# colony.evaporate_pheromones(0.5)
+# colony = AntColony(g, 20, 30)
+# path, cost = colony.simulate(2, 1, 0, 1)
+# print(path)
+# print(cost)
