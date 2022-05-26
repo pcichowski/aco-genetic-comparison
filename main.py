@@ -10,9 +10,11 @@ g = generate_graph(100, 100, 10)
 poss = nx.get_node_attributes(g, 'pos')
 print(poss)
 
-nx.draw(g, poss)
+#nx.draw(g, poss)
 
 plt.show()
 
-colony = AntColony(g, 200, 50)
-colony.evaporate_pheromones(0.5)
+colony = AntColony(g, 20, 30)
+path, cost = colony.simulate(2, 1, 0, 1)
+print(path)
+print(cost)

@@ -27,7 +27,10 @@ class AntColony:
 
     def evaporate_pheromones(self, evaporation_coefficient):
         edges = self.graph.edges(data=True)
-        print(edges)
+        for edge in edges:
+            node1, node2, data = edge
+            old_pheromone = data['pheromone']
+            self.graph[node1][node2]['pheromone'] = (1 - evaporation_coefficient) * old_pheromone
 
     def simulate(self, pheromone_exponent, length_exponent, evaporation_coefficient, pheromone_leaving_coefficient,
                  starting_node=0):
@@ -43,6 +46,9 @@ class AntColony:
             for thread in threads:
                 thread.join()
 
-            # leave pheromones
-            #for ant in ants:
+            self.evaporate_pheromones(evaporation_coefficient)
+
+            for ant in ants:
                 ant.leave_pheromones(pheromone_leaving_coefficient)
+
+        return self.best_path, self.best_cost

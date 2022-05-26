@@ -58,7 +58,7 @@ class Ant:
     def leave_pheromones(self, pheromone_coefficient):
         pheromone_value = self.calculate_pheromone(pheromone_coefficient)
         for i in range(len(self.path) - 1):
-            self.graph[i][i + 1]['pheromone'] += pheromone_value
+            self.graph[self.path[i]][self.path[i+1]]['pheromone'] += pheromone_value
 
     def calculate_pheromone(self, pheromone_coefficient):
         return pheromone_coefficient / self.cost
