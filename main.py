@@ -5,12 +5,15 @@ from networkx.algorithms.approximation import traveling_salesman_problem
 from matplotlib import pyplot as plt
 from run_genetic import genetic
 from ant_colony import AntColony
+from ant import Ant
+from test_coeficients import *
+
 from statistics import mean, variance
 
 from utils import calculate_total_distance
 from utils_genetic import plot_route, plot_improvement
 
-NUMBER_OF_NODES = 15
+NUMBER_OF_NODES = 25
 NUMBER_OF_TESTS = 10
 
 
@@ -61,6 +64,7 @@ def create_plots(graph, results):
 
 
 def run():
+    test_coefficients_genetic(25, (100, 400), 50, (40, 120), 10, (8, 20), 2, (0, 0.04), 0.005)
 
     results = {'times': {'ants': [], 'genetic': []}, 'distances': {'ants': [], 'genetic': []}}
 
