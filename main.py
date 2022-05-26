@@ -5,6 +5,9 @@ import networkx as nx
 from networkx.algorithms.approximation import traveling_salesman_problem
 from matplotlib import pyplot as plt
 from run_genetic import genetic
+from ant_colony import AntColony
+from ant import Ant
+
 
 from utils import calculate_total_distance
 from utils_genetic import plot_route, get_coords
@@ -60,4 +63,5 @@ def run():
 
 run()
 
-
+# colony = AntColony(g, 200, 50)
+# colony.evaporate_pheromones(0.5)
