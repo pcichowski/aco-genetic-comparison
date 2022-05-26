@@ -14,6 +14,7 @@ class AntColony:
         self.best_path = []
         self.best_cost = math.inf
         self.results_lock = threading.Lock()
+        self.steps = [] # best paths in each generation
 
     def run_ant(self, ant, pheromone_exponent, length_exponent):
         cost = ant.go(pheromone_exponent, length_exponent)
@@ -51,4 +52,6 @@ class AntColony:
             for ant in ants:
                 ant.leave_pheromones(pheromone_leaving_coefficient)
 
-        return self.best_path, self.best_cost
+            self.steps.append(self.best_path)
+
+        return self.best_path, self.best_cost, self.steps
