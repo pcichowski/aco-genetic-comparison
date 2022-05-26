@@ -7,11 +7,10 @@ from matplotlib import pyplot as plt
 from run_genetic import genetic
 from ant_colony import AntColony
 from ant import Ant
-
+from test_coeficients import *
 
 from utils import calculate_total_distance
 from utils_genetic import plot_route, get_coords
-
 
 NUMBER_OF_NODES = 25
 NUMBER_OF_TESTS = 1
@@ -47,9 +46,21 @@ def perform_test():
 
 
 def run():
+    test_coefficients_genetic(25, (100, 400), 50, (40, 120), 10, (8, 20), 2, (0, 0.04), 0.005)
 
-    for _ in range(NUMBER_OF_TESTS):
-        perform_test()
+    # g = generate_graph(100,100,25)
+    # colony = AntColony(g, 20, 30)
+    #
+    # time_s = time.time()
+    # path, cost, steps = colony.simulate(2, 1, 0, 1)
+    # time_e = time.time()
+    # print(path)
+    # print(cost)
+    # print(steps)
+    # print(f"Czas: {time_e- time_s}")
+
+    # for _ in range(NUMBER_OF_TESTS):
+    #     perform_test()
 
     # poss = nx.get_node_attributes(graph, 'pos')
     # print(poss)
@@ -61,6 +72,7 @@ def run():
     # # nx.draw(g, poss)
     #
     # plt.show()
+
 
 run()
 
