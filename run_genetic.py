@@ -19,13 +19,12 @@ def genetic(graph, generations=500, population_size=100, elite_size=10, mutation
     return best_solution, steps
 
 
-nb_coords = 25
-
-graph = generate_graph(1000, 1000, nb_coords)
-coords = generate_random_coords(nb_coords)
-best_solution, steps = genetic(graph)
-
-fig, ax = plt.subplots(ncols=2, figsize=(10,5))
-plot_improvement(ax[0], graph, steps)
-plot_route(ax[1], graph, best_solution)
-plt.show()
+# nb_coords = 25
+#
+# graph = generate_graph(1000, 1000, nb_coords)
+# best_solution, steps = genetic(graph)
+#
+# fig, ax = plt.subplots(ncols=2, figsize=(10,5))
+# plot_improvement(ax[0], graph, steps)
+# plot_route(ax[1], graph, best_solution)
+# plt.show()
