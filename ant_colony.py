@@ -1,6 +1,8 @@
 import math
 import threading
 
+import numpy as np
+
 from ant import Ant
 import networkx as nx
 
@@ -14,7 +16,7 @@ class AntColony:
         self.best_path = []
         self.best_cost = math.inf
         self.results_lock = threading.Lock()
-        self.steps = [] # best paths in each generation
+        self.steps = []  # best paths in each generation
 
     def run_ant(self, ant, pheromone_exponent, length_exponent):
         cost = ant.go(pheromone_exponent, length_exponent)
@@ -52,6 +54,6 @@ class AntColony:
             for ant in ants:
                 ant.leave_pheromones(pheromone_leaving_coefficient)
 
-            self.steps.append(self.best_path)
+            self.steps.append(np.array(self.best_path[:-1]))
 
-        return self.best_path, self.best_cost, self.steps
+        return self.best_path[:-1], self.best_cost, self.steps

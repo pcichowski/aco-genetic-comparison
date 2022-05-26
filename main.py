@@ -1,7 +1,6 @@
+import math
 import time
-
 from graph_generator import generate_graph
-import networkx as nx
 from networkx.algorithms.approximation import traveling_salesman_problem
 from matplotlib import pyplot as plt
 from run_genetic import genetic
@@ -9,17 +8,19 @@ from ant_colony import AntColony
 from ant import Ant
 from test_coeficients import *
 
+from statistics import mean, variance
+
 from utils import calculate_total_distance
-from utils_genetic import plot_route, get_coords
+from utils_genetic import plot_route, plot_improvement
 
 NUMBER_OF_NODES = 25
-NUMBER_OF_TESTS = 1
+NUMBER_OF_TESTS = 10
 
 
-def perform_test():
-    graph = generate_graph(1000, 1000, 25)
+def perform_test(show_graphs=True):
+    graph = generate_graph(1000, 1000, NUMBER_OF_NODES)
 
-    results = {'time': {}, 'distance': {}, 'path': {}}
+    results = {'time': {}, 'distance': {}, 'path': {}, 'steps': {}}
 
     # optimal approximation algorithm
     time_start = time.time()
@@ -30,53 +31,82 @@ def perform_test():
 
     # genetic algorithm
     time_start = time.time()
-    results['path']['genetic'], _ = genetic(graph)
+    results['path']['genetic'], results['steps']['genetic'] = genetic(graph, generations=400)
     time_end = time.time()
     results['time']['genetic'] = time_end - time_start  # in seconds
     results['distance']['genetic'] = calculate_total_distance(graph, results['path']['genetic'])
 
     # ant colony optimization algorithm
+    colony = AntColony(graph, 20, 30)
     time_start = time.time()
-    results['path']['ants'] = [0]  # TODO execute ant colony algorithm
+    results['path']['ants'], results['distance']['ants'], results['steps']['ants'] = colony.simulate(1, 1.25, 0.5, 1.33)
     time_end = time.time()
     results['time']['ants'] = time_end - time_start  # in seconds
-    results['distance']['ants'] = calculate_total_distance(graph, results['path']['ants'])
 
-    print(results)
+    if show_graphs:
+        create_plots(graph, results)
+
+    return results
+
+
+def create_plots(graph, results):
+    fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(10, 5))
+    plot_improvement(ax[0][0], graph, results['steps']['ants'])
+    plot_route(ax[0][1], graph, results['path']['ants'])
+    ax[0][0].set_title('Ant colony optimization algorithm')
+
+    plot_improvement(ax[1][0], graph, results['steps']['genetic'])
+    plot_route(ax[1][1], graph, results['path']['genetic'])
+    ax[1][0].set_title('Genetic algorithm')
+
+    fig.tight_layout()
+    plt.show()
 
 
 def run():
     test_coefficients_genetic(25, (100, 400), 50, (40, 120), 10, (8, 20), 2, (0, 0.04), 0.005)
 
-    # g = generate_graph(100,100,25)
-    # colony = AntColony(g, 20, 30)
-    #
-    # time_s = time.time()
-    # path, cost, steps = colony.simulate(2, 1, 0, 1)
-    # time_e = time.time()
-    # print(path)
-    # print(cost)
-    # print(steps)
-    # print(f"Czas: {time_e- time_s}")
+    results = {'times': {'ants': [], 'genetic': []}, 'distances': {'ants': [], 'genetic': []}}
 
-    # for _ in range(NUMBER_OF_TESTS):
-    #     perform_test()
+    for _ in range(NUMBER_OF_TESTS):
+        test_results = perform_test(show_graphs=False)
 
-    # poss = nx.get_node_attributes(graph, 'pos')
-    # print(poss)
-    #
-    # fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
-    # nodes_positions = get_coords(graph)
-    # plot_route(ax[1], graph, list(graph.nodes.keys()))
-    #
-    # # nx.draw(g, poss)
-    #
-    # plt.show()
+        results['times']['ants'].append(test_results['time']['ants'])
+        results['times']['genetic'].append(test_results['time']['genetic'])
+
+        results['distances']['ants'].append(test_results['distance']['ants'])
+        results['distances']['genetic'].append(test_results['distance']['genetic'])
+
+    mean_time_ants = mean(results['times']['ants'])
+    mean_time_genetic = mean(results['times']['genetic'])
+    mean_distance_ants = mean(results['distances']['ants'])
+    mean_distance_genetic = mean(results['distances']['genetic'])
+
+    fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(10, 5))
+    ax[0][0].plot(range(1, NUMBER_OF_TESTS + 1), results['times']['ants'])
+    ax[0][1].plot(range(1, NUMBER_OF_TESTS + 1), results['times']['genetic'])
+
+    ax[1][0].plot(range(1, NUMBER_OF_TESTS + 1), results['distances']['ants'])
+    ax[1][1].plot(range(1, NUMBER_OF_TESTS + 1), results['distances']['genetic'])
+
+    ax[0][0].plot(range(1, NUMBER_OF_TESTS + 1), [mean_time_ants for _ in range(1, NUMBER_OF_TESTS + 1)])
+    ax[0][1].plot(range(1, NUMBER_OF_TESTS + 1), [mean_time_genetic for _ in range(1, NUMBER_OF_TESTS + 1)])
+    ax[1][0].plot(range(1, NUMBER_OF_TESTS + 1), [mean_distance_ants for _ in range(1, NUMBER_OF_TESTS + 1)])
+    ax[1][1].plot(range(1, NUMBER_OF_TESTS + 1), [mean_distance_genetic for _ in range(1, NUMBER_OF_TESTS + 1)])
+
+    ax[0][0].set_xlabel('Test number')
+    ax[0][1].set_xlabel('Test number')
+    ax[1][0].set_xlabel('Test number')
+    ax[1][1].set_xlabel('Test number')
+    ax[0][0].set_ylabel('Time [s]')
+    ax[0][1].set_ylabel('Time [s]')
+    ax[1][0].set_ylabel('Distance')
+    ax[1][1].set_ylabel('Distance')
+
+    ax[0][0].set_title('ACO algorithm')
+    ax[0][1].set_title('Genetic algorithm')
+    fig.tight_layout()
+    fig.show()
 
 
 run()
-
-# colony = AntColony(g, 20, 30)
-# path, cost = colony.simulate(2, 1, 0, 1)
-# print(path)
-# print(cost)
