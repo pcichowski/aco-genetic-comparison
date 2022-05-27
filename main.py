@@ -1,7 +1,5 @@
 import math
 import time
-from concurrent.futures import ThreadPoolExecutor
-
 from graph_generator import generate_graph
 from networkx.algorithms.approximation import traveling_salesman_problem
 from matplotlib import pyplot as plt
@@ -15,7 +13,7 @@ from statistics import mean, variance
 from utils import calculate_total_distance
 from utils_genetic import plot_route, plot_improvement
 
-NUMBER_OF_NODES = 10
+NUMBER_OF_NODES = 25
 NUMBER_OF_TESTS = 10
 
 
