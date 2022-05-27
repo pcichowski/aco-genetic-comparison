@@ -31,7 +31,8 @@ def perform_test(show_graphs=True):
 
     # genetic algorithm
     time_start = time.time()
-    results['path']['genetic'], results['steps']['genetic'] = genetic(graph, generations=400)
+    results['path']['genetic'], results['steps']['genetic'] = genetic(graph, generations=100, population_size=97,
+                                                                      elite_size=18, mutation_rate=0.01)
     time_end = time.time()
     results['time']['genetic'] = time_end - time_start  # in seconds
     results['distance']['genetic'] = calculate_total_distance(graph, results['path']['genetic'])
@@ -39,7 +40,7 @@ def perform_test(show_graphs=True):
     # ant colony optimization algorithm
     colony = AntColony(graph, 20, 30)
     time_start = time.time()
-    results['path']['ants'], results['distance']['ants'], results['steps']['ants'] = colony.simulate(1, 1.25, 0.5, 1.33)
+    results['path']['ants'], results['distance']['ants'], results['steps']['ants'] = colony.simulate(1.2, 1.2, 0.4, 1.5)
     time_end = time.time()
     results['time']['ants'] = time_end - time_start  # in seconds
 
@@ -64,7 +65,7 @@ def create_plots(graph, results):
 
 
 def run():
-    test_coefficients_genetic(25, (100, 400), 50, (40, 120), 10, (8, 20), 2, (0, 0.04), 0.005)
+    # test_coefficients_genetic(25, (100, 400), 50, (40, 120), 10, (8, 20), 2, (0, 0.04), 0.002)
 
     results = {'times': {'ants': [], 'genetic': []}, 'distances': {'ants': [], 'genetic': []}}
 
@@ -81,6 +82,11 @@ def run():
     mean_time_genetic = mean(results['times']['genetic'])
     mean_distance_ants = mean(results['distances']['ants'])
     mean_distance_genetic = mean(results['distances']['genetic'])
+
+    std_time_ants = math.sqrt(variance(results['times']['ants']))
+    std_time_genetic = math.sqrt(variance(results['times']['genetic']))
+    std_distance_ants = math.sqrt(variance(results['distances']['ants']))
+    std_distance_genetic = math.sqrt(variance(results['distances']['genetic']))
 
     fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(10, 5))
     ax[0][0].plot(range(1, NUMBER_OF_TESTS + 1), results['times']['ants'])
@@ -107,6 +113,16 @@ def run():
     ax[0][1].set_title('Genetic algorithm')
     fig.tight_layout()
     fig.show()
+
+    print(f"Average distance for ACO: {mean_distance_ants:.2f}")
+    print(f"Average time for ACO: {mean_time_ants:.2f}")
+    print(f"Average distance for genetic: {mean_distance_genetic:.2f}")
+    print(f"Average time for genetic: {mean_time_genetic:.2f}")
+
+    print(f"Standard deviation distance for ACO: {std_distance_ants:.2f}")
+    print(f"Standard deviation time for ACO: {std_time_ants:.2f}")
+    print(f"Standard deviation distance for genetic: {std_distance_genetic:.2f}")
+    print(f"Standard deviation time for genetic: {std_time_genetic:.2f}")
 
 
 run()
