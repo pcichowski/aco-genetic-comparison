@@ -2,6 +2,7 @@ import networkx as nx
 from random import randint
 import math
 
+
 def generate_graph(width, height, number_of_nodes):
     graph = nx.Graph()
 
