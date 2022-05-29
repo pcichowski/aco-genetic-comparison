@@ -1,5 +1,4 @@
-from utils_genetic import dist
-import networkx as nx
+
 
 def calculate_total_distance(graph, path):
     total_distance = 0

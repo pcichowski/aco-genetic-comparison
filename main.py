@@ -1,11 +1,8 @@
 import math
 import time
-from graph_generator import generate_graph
 from networkx.algorithms.approximation import traveling_salesman_problem
 from matplotlib import pyplot as plt
 from run_genetic import genetic
-from ant_colony import AntColony
-from ant import Ant
 from test_coeficients import *
 
 from statistics import mean, variance
@@ -13,8 +10,8 @@ from statistics import mean, variance
 from utils import calculate_total_distance
 from utils_genetic import plot_route, plot_improvement
 
-NUMBER_OF_NODES = 25
-NUMBER_OF_TESTS = 10
+NUMBER_OF_NODES = 50
+NUMBER_OF_TESTS = 30
 
 
 def perform_test(show_graphs=True):
@@ -31,14 +28,14 @@ def perform_test(show_graphs=True):
 
     # genetic algorithm
     time_start = time.time()
-    results['path']['genetic'], results['steps']['genetic'] = genetic(graph, generations=100, population_size=97,
-                                                                      elite_size=18, mutation_rate=0.01)
+    results['path']['genetic'], results['steps']['genetic'] = genetic(graph, generations=136, population_size=140,
+                                                                      elite_size=28, mutation_rate=0.03)
     time_end = time.time()
     results['time']['genetic'] = time_end - time_start  # in seconds
     results['distance']['genetic'] = calculate_total_distance(graph, results['path']['genetic'])
 
     # ant colony optimization algorithm
-    colony = AntColony(graph, 20, 30)
+    colony = AntColony(graph, 25, 40)
     time_start = time.time()
     results['path']['ants'], results['distance']['ants'], results['steps']['ants'] = colony.simulate(1.2, 1.2, 0.4, 1.5)
     time_end = time.time()
@@ -69,14 +66,20 @@ def run():
 
     results = {'times': {'ants': [], 'genetic': []}, 'distances': {'ants': [], 'genetic': []}}
 
-    for _ in range(NUMBER_OF_TESTS):
+    for i in range(NUMBER_OF_TESTS):
+        time_s = time.time()
         test_results = perform_test(show_graphs=False)
+        time_e = time.time()
+
+        print(f'completed {i + 1} test   duration: {(time_e - time_s):.2f}')
 
         results['times']['ants'].append(test_results['time']['ants'])
         results['times']['genetic'].append(test_results['time']['genetic'])
 
         results['distances']['ants'].append(test_results['distance']['ants'])
         results['distances']['genetic'].append(test_results['distance']['genetic'])
+
+    print('\n')
 
     mean_time_ants = mean(results['times']['ants'])
     mean_time_genetic = mean(results['times']['genetic'])
@@ -117,7 +120,7 @@ def run():
     print(f"Average distance for ACO: {mean_distance_ants:.2f}")
     print(f"Average time for ACO: {mean_time_ants:.2f}")
     print(f"Average distance for genetic: {mean_distance_genetic:.2f}")
-    print(f"Average time for genetic: {mean_time_genetic:.2f}")
+    print(f"Average time for genetic: {mean_time_genetic:.2f}\n")
 
     print(f"Standard deviation distance for ACO: {std_distance_ants:.2f}")
     print(f"Standard deviation time for ACO: {std_time_ants:.2f}")

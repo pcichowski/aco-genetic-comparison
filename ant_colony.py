@@ -4,7 +4,6 @@ import threading
 import numpy as np
 
 from ant import Ant
-import networkx as nx
 
 
 class AntColony:
