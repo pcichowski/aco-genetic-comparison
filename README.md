@@ -72,14 +72,17 @@ While increasing the number of nodes however, we can see the advantage of the AC
 Nonetheless, Genetic is much faster in every case.
 
 If we were to decide which algorithm to choose, it would depend mainly on the size of the graph being tested. For relatively small graphs the genetic algorithm would be better, as the results are similar, but it is faster than the ant colony algorithm. As the number of vertices increases, the obvious choice is ACO, which achieves a much better performance (for a complete graph with 75 vertices it achieves an almost 3-fold advantage). 
-
-Translated with www.DeepL.com/Translator (free version)
+<br><br>
 
 ## Credits
-#### Created by
+### Created by
  - [Michał Ziemiec](https://github.com/Mixss)
  - [Kacper Cencelewski](https://github.com/kapselccc)
  - [Paweł Cichowski](https://github.com/Silentsky0)
 
-#### License
-This project is a free and open-source software licensed under the [**MIT license**](https://opensource.org/licenses/MIT)
+
+### Acknowledgments
+Used graph data structure shared by [NetworkX](https://networkx.org)
+
+### License
+This project is a free and open-source software licensed under the [**MIT license**](https://opensource.org/licenses/MIT) (see [LICENSE](https://github.com/Silentsky0/si-project/blob/main/LICENSE))
