@@ -1,2 +1,0 @@
-networkx
-decorator == 5.1.1

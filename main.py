@@ -1,92 +1,131 @@
-from loader import load_graph
-from dijkstry import execute_dijkstra
-from ant_colony import simulate_colony
-import networkx as nx
-from random import randint
-from statistics import mean, stdev
-from matplotlib import pyplot as plt
+import math
 import time
-from graph_generator import *
+from networkx.algorithms.approximation import traveling_salesman_problem
+from matplotlib import pyplot as plt
+from run_genetic import genetic
+from test_coeficients import *
 
-NUMBER_OF_NODES = 20
-NUMBER_OF_TESTS = 1
+from statistics import mean, variance
 
-results = {"shortest": [], "dijkstra": [], "ants": []}
+from utils import calculate_total_distance
+from utils_genetic import plot_route, plot_improvement
+
+NUMBER_OF_NODES = 50
+NUMBER_OF_TESTS = 30
 
 
-def calculate(print_console=False):
-    # graph = load_graph()
-    # graph = nx.gnp_random_graph(NUMBER_OF_NODES, 0.05)
+def perform_test(show_graphs=True):
+    graph = generate_graph(1000, 1000, NUMBER_OF_NODES)
 
-    graph = generate_graph(1000,1000, NUMBER_OF_NODES)
+    results = {'time': {}, 'distance': {}, 'path': {}, 'steps': {}}
 
-    nx.set_node_attributes(graph, None, 'parent')
-    nx.set_node_attributes(graph, False, 'visited')
-    nx.set_edge_attributes(graph, 0, 'pheromone')
-    for edge in graph.edges:
-        graph[edge[0]][edge[1]]['distance'] = randint(1, 100)
-
-    begin = randint(0, NUMBER_OF_NODES - 1)
-    end = randint(0, NUMBER_OF_NODES - 1)
-
-    if not nx.has_path(graph, begin, end):
-        return
-
-    shortest_path = nx.shortest_path(graph, source=begin, target=end, weight='distance')
-    shortest_distance = 0
-    for i in range(len(shortest_path) - 1):  # for each segment
-        node = shortest_path[i]
-        next_node = shortest_path[i + 1]
-
-        distance = graph[node][next_node]['distance']
-        shortest_distance += distance
-
-    if print_console: print(f"shortest: {shortest_path}\n{shortest_distance}")
-
+    # optimal approximation algorithm
     time_start = time.time()
-    dijkstra_path, dijkstra_dist = execute_dijkstra(graph, begin, end)
+    results['path']['christofides'] = traveling_salesman_problem(graph, weight='distance')
     time_end = time.time()
-    results['dijkstra_time'] = time_end - time_start
+    results['time']['christofides'] = time_end - time_start  # in seconds
+    results['distance']['christofides'] = calculate_total_distance(graph, results['path']['christofides'])
 
-    if print_console: print(f"Dijkstra: {dijkstra_path}\n{dijkstra_dist}")
-
+    # genetic algorithm
     time_start = time.time()
-    ant_path, ant_dist = simulate_colony(graph, begin, end)
+    results['path']['genetic'], results['steps']['genetic'] = genetic(graph, generations=136, population_size=140,
+                                                                      elite_size=28, mutation_rate=0.03)
     time_end = time.time()
-    results['ants_time'] = time_end - time_start
+    results['time']['genetic'] = time_end - time_start  # in seconds
+    results['distance']['genetic'] = calculate_total_distance(graph, results['path']['genetic'])
 
-    if print_console: print(f"Ants: {ant_path}\n{ant_dist}")
+    # ant colony optimization algorithm
+    colony = AntColony(graph, 25, 40)
+    time_start = time.time()
+    results['path']['ants'], results['distance']['ants'], results['steps']['ants'] = colony.simulate(1.2, 1.2, 0.4, 1.5)
+    time_end = time.time()
+    results['time']['ants'] = time_end - time_start  # in seconds
 
-    results['shortest'].append(shortest_distance)
-    results['dijkstra'].append(dijkstra_dist)
-    results['ants'].append(ant_dist)
+    if show_graphs:
+        create_plots(graph, results)
+
+    return results
 
 
-def main():
-    for _ in range(NUMBER_OF_TESTS):
-        calculate()
+def create_plots(graph, results):
+    fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(10, 5))
+    plot_improvement(ax[0][0], graph, results['steps']['ants'])
+    plot_route(ax[0][1], graph, results['path']['ants'])
+    ax[0][0].set_title('Ant colony optimization algorithm')
 
-    deviation_ants = []
-    deviation_dijkstra = []
-    for result_opt, result_dijkstra in zip(results['shortest'], results['dijkstra']):
-        deviation_dijkstra.append(round((result_dijkstra - result_opt) / result_dijkstra * 100, 2))
+    plot_improvement(ax[1][0], graph, results['steps']['genetic'])
+    plot_route(ax[1][1], graph, results['path']['genetic'])
+    ax[1][0].set_title('Genetic algorithm')
 
-    for result_opt, result_ants in zip(results['shortest'], results['ants']):
-        deviation_ants.append(round((result_ants - result_opt) / result_ants * 100, 2))
+    fig.tight_layout()
+    plt.show()
 
-    print(f"mean deviation of ants: {mean(deviation_ants)}%   time: {results['ants_time']}")
-    print(f"mean deviation of dijkstra: {mean(deviation_dijkstra)}%   time: {results['dijkstra_time']}")
 
-    fig, axs = plt.subplots(2, 1, figsize=(8, 10))
-    ax = axs[0]
-    ax.plot([i for i in range(1, len(results['shortest']) + 1)], results['shortest'], label='optimal')
-    ax.plot([i for i in range(1, len(results['shortest']) + 1)], results['ants'], label='ants')
-    ax.plot([i for i in range(1, len(results['shortest']) + 1)], results['dijkstra'], label='dijkstra')
-    ax.set_title('Comparison of algorithms')
-    ax.set_xlabel('Test number')
-    ax.set_ylabel('Found path length')
-    ax.legend()
-    ax.grid(True)
-    plt.savefig('./comparison.png')
+def run():
+    # test_coefficients_genetic(25, (100, 400), 50, (40, 120), 10, (8, 20), 2, (0, 0.04), 0.002)
 
-main()
+    results = {'times': {'ants': [], 'genetic': []}, 'distances': {'ants': [], 'genetic': []}}
+
+    for i in range(NUMBER_OF_TESTS):
+        time_s = time.time()
+        test_results = perform_test(show_graphs=False)
+        time_e = time.time()
+
+        print(f'completed {i + 1} test   duration: {(time_e - time_s):.2f}')
+
+        results['times']['ants'].append(test_results['time']['ants'])
+        results['times']['genetic'].append(test_results['time']['genetic'])
+
+        results['distances']['ants'].append(test_results['distance']['ants'])
+        results['distances']['genetic'].append(test_results['distance']['genetic'])
+
+    print('\n')
+
+    mean_time_ants = mean(results['times']['ants'])
+    mean_time_genetic = mean(results['times']['genetic'])
+    mean_distance_ants = mean(results['distances']['ants'])
+    mean_distance_genetic = mean(results['distances']['genetic'])
+
+    std_time_ants = math.sqrt(variance(results['times']['ants']))
+    std_time_genetic = math.sqrt(variance(results['times']['genetic']))
+    std_distance_ants = math.sqrt(variance(results['distances']['ants']))
+    std_distance_genetic = math.sqrt(variance(results['distances']['genetic']))
+
+    fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(10, 5))
+    ax[0][0].plot(range(1, NUMBER_OF_TESTS + 1), results['times']['ants'])
+    ax[0][1].plot(range(1, NUMBER_OF_TESTS + 1), results['times']['genetic'])
+
+    ax[1][0].plot(range(1, NUMBER_OF_TESTS + 1), results['distances']['ants'])
+    ax[1][1].plot(range(1, NUMBER_OF_TESTS + 1), results['distances']['genetic'])
+
+    ax[0][0].plot(range(1, NUMBER_OF_TESTS + 1), [mean_time_ants for _ in range(1, NUMBER_OF_TESTS + 1)])
+    ax[0][1].plot(range(1, NUMBER_OF_TESTS + 1), [mean_time_genetic for _ in range(1, NUMBER_OF_TESTS + 1)])
+    ax[1][0].plot(range(1, NUMBER_OF_TESTS + 1), [mean_distance_ants for _ in range(1, NUMBER_OF_TESTS + 1)])
+    ax[1][1].plot(range(1, NUMBER_OF_TESTS + 1), [mean_distance_genetic for _ in range(1, NUMBER_OF_TESTS + 1)])
+
+    ax[0][0].set_xlabel('Test number')
+    ax[0][1].set_xlabel('Test number')
+    ax[1][0].set_xlabel('Test number')
+    ax[1][1].set_xlabel('Test number')
+    ax[0][0].set_ylabel('Time [s]')
+    ax[0][1].set_ylabel('Time [s]')
+    ax[1][0].set_ylabel('Distance')
+    ax[1][1].set_ylabel('Distance')
+
+    ax[0][0].set_title('ACO algorithm')
+    ax[0][1].set_title('Genetic algorithm')
+    fig.tight_layout()
+    fig.show()
+
+    print(f"Average distance for ACO: {mean_distance_ants:.2f}")
+    print(f"Average time for ACO: {mean_time_ants:.2f}")
+    print(f"Average distance for genetic: {mean_distance_genetic:.2f}")
+    print(f"Average time for genetic: {mean_time_genetic:.2f}\n")
+
+    print(f"Standard deviation distance for ACO: {std_distance_ants:.2f}")
+    print(f"Standard deviation time for ACO: {std_time_ants:.2f}")
+    print(f"Standard deviation distance for genetic: {std_distance_genetic:.2f}")
+    print(f"Standard deviation time for genetic: {std_time_genetic:.2f}")
+
+
+run()

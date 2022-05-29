@@ -2,6 +2,7 @@ import networkx as nx
 from random import randint
 import math
 
+
 def generate_graph(width, height, number_of_nodes):
     graph = nx.Graph()
 
@@ -19,6 +20,6 @@ def generate_graph(width, height, number_of_nodes):
 
             dist = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-            graph.add_edge(i, j, distance=dist, pheromone=0)
+            graph.add_edge(i, j, distance=dist, pheromone=1)
 
     return graph

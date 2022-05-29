@@ -1,127 +1,58 @@
-import networkx as nx
-from loader import load_graph
-from operator import itemgetter
-from Ant import Ant
-from dijkstry import dijkstry
-from matplotlib import pyplot as plt
+import math
+import threading
 
-NUMBER_OF_ITERATIONS = 30
-NUMBER_OF_ANTS = 50
+import numpy as np
 
-PHEROMONE_COEFFICIENT = 2
-EVAPORATION_COEFFICIENT = 0.7
+from ant import Ant
 
 
-def simulate_colony(graph, begin, end):
+class AntColony:
 
-    most_common_paths = [[], [], [], []]
-    most_common_paths_counts = [[], [], []]
-    iterations = []
+    def __init__(self, graph, number_of_ants, number_of_generations):
+        self.number_of_ants = number_of_ants
+        self.graph = graph
+        self.number_of_generations = number_of_generations
+        self.best_path = []
+        self.best_cost = math.inf
+        self.results_lock = threading.Lock()
+        self.steps = []  # best paths in each generation
 
-    for iteration in range(NUMBER_OF_ITERATIONS):
+    def run_ant(self, ant, pheromone_exponent, length_exponent):
+        cost = ant.go(pheromone_exponent, length_exponent)
+        self.add_result(ant.path, cost)
 
-        ants = []
+    def add_result(self, path, cost):
+        with self.results_lock:
+            if cost < self.best_cost:
+                self.best_path = path
+                self.best_cost = cost
 
-        all_paths = []
-        all_paths_counts = []
+    def evaporate_pheromones(self, evaporation_coefficient):
+        edges = self.graph.edges(data=True)
+        for edge in edges:
+            node1, node2, data = edge
+            old_pheromone = data['pheromone']
+            self.graph[node1][node2]['pheromone'] = (1 - evaporation_coefficient) * old_pheromone
 
-        # add N ants
-        for ant_id in range(NUMBER_OF_ANTS):
-            ant = Ant(ant_id, graph, begin, end)
-            ants.append(ant)
+    def simulate(self, pheromone_exponent, length_exponent, evaporation_coefficient, pheromone_leaving_coefficient,
+                 starting_node=0):
+        for generation_number in range(self.number_of_generations):
+            ants = []
+            threads = list()
+            for i in range(self.number_of_ants):
+                ants.append(Ant(i, self.graph, starting_node))
+                x = threading.Thread(target=self.run_ant, args=[ants[i], pheromone_exponent, length_exponent])
+                threads.append(x)
+                x.start()
 
-        # let the ants start their journey
-        for ant in ants:
-            ant.walk_to_goal_extended()
+            for thread in threads:
+                thread.join()
 
-        for ant in ants:
-            if ant.alive:
-                delta_pheromone = PHEROMONE_COEFFICIENT / ant.distance_walked
+            self.evaporate_pheromones(evaporation_coefficient)
 
-                if (ant.path_walked, ant.distance_walked) in all_paths:
-                    all_paths_counts[all_paths.index((ant.path_walked, ant.distance_walked))] += 1
-                else:
-                    all_paths.append((ant.path_walked, ant.distance_walked))
-                    all_paths_counts.append(1)
+            for ant in ants:
+                ant.leave_pheromones(pheromone_leaving_coefficient)
 
-                for i in range(len(ant.path_walked) - 1):  # for each segment
-                    node = ant.path_walked[i]
-                    next_node = ant.path_walked[i + 1]
+            self.steps.append(np.array(self.best_path[:-1]))
 
-                    graph[node][next_node]['pheromone'] += delta_pheromone
-
-        for edge in graph.edges:
-
-            graph[edge[0]][edge[1]]['pheromone'] *= (1 - EVAPORATION_COEFFICIENT)
-
-            # edge['pheromone'] *= (1 - PHEROMONE_COEFFICIENT)
-
-            if graph[edge[0]][edge[1]]['pheromone'] < 0:
-                graph[edge[0]][edge[1]]['pheromone'] = 0
-
-        max_index = all_paths_counts.index(max(all_paths_counts))
-
-        all_paths_counts_sorted = sorted(all_paths_counts, reverse=True)
-
-        min_path = sorted(all_paths, key=lambda k: k[1])[0]
-
-        for i, top_path_count in enumerate(all_paths_counts_sorted[:3]):
-            most_common_paths[i].append(all_paths[all_paths_counts.index(top_path_count)])
-            most_common_paths_counts[i].append(all_paths_counts[all_paths_counts.index(top_path_count)])
-
-        if len(all_paths_counts_sorted) == 1:
-            most_common_paths[1].append(([], 0))
-            most_common_paths_counts[1].append(0)
-            most_common_paths[2].append(([], 0))
-            most_common_paths_counts[2].append(0)
-
-        if len(all_paths_counts_sorted) == 2:
-            most_common_paths[2].append(([], 0))
-            most_common_paths_counts[2].append(0)
-
-        most_common_paths[3].append(min_path)
-
-        iterations.append(iteration)
-    determinant_ant = Ant(-1, graph, begin, end)
-
-    determinant_ant.walk_to_goal_extended()
-
-    final_path = determinant_ant.path_walked
-
-    # print(final_path)
-    #print(determinant_ant.distance_walked)
-
-    create_statistics(iterations, most_common_paths, most_common_paths_counts)
-
-    return final_path, determinant_ant.distance_walked
-
-
-def create_statistics(iterations, most_common_paths, most_common_paths_counts):
-    distances0 = [dist for _, dist in most_common_paths[0]]
-    distances1 = [dist for _, dist in most_common_paths[1]]
-    distances2 = [dist for _, dist in most_common_paths[2]]
-    distances_min = [dist for _, dist in most_common_paths[3]]
-
-    counts0 = most_common_paths_counts[0]
-    counts1 = most_common_paths_counts[1]
-    counts2 = most_common_paths_counts[2]
-
-    fig, axs = plt.subplots(2, 1, figsize=(6, 7))
-
-    ax = axs[0]
-    ax.plot(iterations, distances0, 'r-', label='Most popular path')
-    ax.plot(iterations, distances_min, 'c-', label='Shortest path found')
-    ax.grid(True)
-    ax.set_title('Most popular and shortest path lengths')
-    ax.set_xlabel('Epoch')
-    ax.set_ylabel('Path length')
-
-    ax = axs[1]
-    ax.plot(iterations, counts0, 'r-', iterations, counts1, 'g-', iterations, counts2, 'b-')
-    ax.grid(True)
-    ax.set_title('Top three popular paths')
-    ax.set_xlabel('Epoch')
-    ax.set_ylabel('Number of ants that chose this path')
-
-    plt.tight_layout()
-    plt.savefig('./figure.png')
+        return self.best_path[:-1], self.best_cost, self.steps
